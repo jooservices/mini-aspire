@@ -14,6 +14,8 @@ use Symfony\Contracts\Translation\TranslatorInterface;
  */
 class BaseController extends AbstractController
 {
+    const VALID_TOKEN = 'MAEZSTcpIa-ZCD0hLXszbM9FaOqyPizV';
+
     /**
      * @var TranslatorInterface $trans
      */
@@ -46,7 +48,7 @@ class BaseController extends AbstractController
         /**
          * Opcode only this token can do delete
          */
-        if ($request->getMethod() === 'DELETE' && $token !== 'MAEZSTcpIa-ZCD0hLXszbM9FaOqyPizV') {
+        if ($request->getMethod() === 'DELETE' && $token !== self::VALID_TOKEN) {
             return $this->respondDenied();
         }
 

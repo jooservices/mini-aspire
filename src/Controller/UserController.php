@@ -10,6 +10,7 @@ use Symfony\Component\Routing\Annotation\Route;
 /**
  * Class UserController
  * @Route("/user")
+ * @TODO Move queries ( entities usage ) to Model
  */
 class UserController extends BaseController
 {
@@ -141,9 +142,14 @@ class UserController extends BaseController
 
         $user->setUpdated(new \DateTime());
         $em->persist($user);
-        $em->flush();
 
-        return $this->respondSucceed(['user' => $user]);
+        try {
+            $em->flush();
+
+            return $this->respondSucceed(['user' => $user]);
+        } catch (\Exception $exception) {
+            return $this->respondBad($exception->getMessage());
+        }
     }
 
     /**
@@ -164,13 +170,16 @@ class UserController extends BaseController
         }
 
         $em->remove($user);
-        $em->flush();
 
-        /**
-         * @TODO Remove related loans records or archive them
-         */
+        try {
+            $em->flush();
+            /**
+             * @TODO Remove related loans records or archive them
+             */
 
-        return $this->respondSucceed(['user' => $user]);
+            return $this->respondSucceed(['user' => $user]);
+        } catch (\Exception $exception) {
+            return $this->respondBad($exception->getMessage());
+        }
     }
-
 }

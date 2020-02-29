@@ -43,8 +43,8 @@ class LoansController extends BaseController
 
         $amount = (double)$request->get('amount');
 
-        if ($amount <= 0.0) {
-            return $this->respondBad('Amount can not lower than 0');
+        if ($amount <= UsersLoans::MINIMUM_AMOUNT) {
+            return $this->respondBad('Amount can not lower than ' . UsersLoans::MINIMUM_AMOUNT);
         }
 
         $frequency = (int)$request->get('frequency');
@@ -63,16 +63,16 @@ class LoansController extends BaseController
 
         $now          = new \DateTime();
         $finishedDate = clone $now;
+        // Duration based on month unit
         $finishedDate->add(new \DateInterval('P' . $duration . 'M'));
 
         $loanEntity = new UsersLoans();
         $loanEntity->setuser($userEntity);
         $loanEntity->setAmount($amount);
-
         $loanEntity->setFrequency($frequency);
         $loanEntity->setDuration($duration);
         // Interest could be 0
-        $loanEntity->setInterest((int)$request->get('interest'));
+        $loanEntity->setInterest((float)$request->get('interest'));
         $amountLeft = $amount;
         $extraFees  = $request->get('extra_fees');
         if ($extraFees && is_array($extraFees)) {
@@ -109,16 +109,15 @@ class LoansController extends BaseController
 
         try {
             $em->flush();
+            /**
+             * @TODO
+             * Actually loan is not "effect" if not activated. But for moment we are ignored it
+             * Loan also can can't flood create. For real life i believe minimum is daily
+             */
+            return $this->respondSucceed(['loan' => $loanEntity]);
         } catch (\Exception $exception) {
             return $this->respondBad($exception->getMessage());
         }
-
-        /**
-         * @TODO
-         * Actually loan is not "effect" if not activated. But for moment we are ignored it
-         * Loan also can can't flood create. For real life i believe minimum is daily
-         */
-        return $this->respondSucceed(['loan' => $loanEntity]);
     }
 
     /**
@@ -192,19 +191,16 @@ class LoansController extends BaseController
         $transaction->setLoan($loan);
         $transaction->setFullName($fullName);
         $transaction->setAmount($amount);
-
         $loan->setAmountLeft($loan->getAmountLeft() - $amount);
+
         $userEntity = $loan->getUser();
         $userEntity->setLoans($userEntity->getLoans() - $amount);
-        $em->persist($transaction);
 
+        $em->persist($transaction);
         $em->persist($loan);
         $em->persist($userEntity);
 
         try {
-            // Update amount left
-
-
             $em->flush();
             return $this->respondSucceed(['transaction' => $transaction]);
         } catch (\Exception $exception) {

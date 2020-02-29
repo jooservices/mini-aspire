@@ -14,6 +14,8 @@ class UsersLoans
     const FREQUENCY_MONTHLY = 2;
     const FREQUENCY_YEARLY = 3;
 
+    const MINIMUM_AMOUNT = 0.0;
+
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
