@@ -170,12 +170,12 @@ class LoansController extends BaseController
         $fullName = $request->get('full_name');
         $amount   = (double)$request->get('amount');
 
-        if ($amount <= 0.0) {
-            return $this->respondBad('Amount is lower than 0.0');
-        }
-
         if (!$fullName || !$amount) {
             return $this->respondBad();
+        }
+
+        if ($amount <= 0.0) {
+            return $this->respondBad('Amount is lower than 0.0');
         }
 
         /**
