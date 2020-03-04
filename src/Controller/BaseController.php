@@ -76,8 +76,9 @@ class BaseController extends AbstractController
     protected function respondError(string $message, int $httpCode)
     {
         return $this->json([
-            'error' => true,
-            'message' => $this->trans->trans($message)
+            //'error' => true,
+            //'message' => $this->trans->trans($message)
+            'error' => $message
         ])->setStatusCode($httpCode);
     }
 
@@ -91,6 +92,16 @@ class BaseController extends AbstractController
             'data' => $data,
             'error' => false,
         ]);
+    }
+
+    /**
+     * @param object $data
+     * @return JsonResponse
+     */
+    protected function respondSucceedData($data)
+    {
+        return new JsonResponse(json_encode($data), Response::HTTP_CREATED, [], true);
+        //return $this->json($data)->setStatusCode(Response::HTTP_CREATED);
     }
 
     /**
